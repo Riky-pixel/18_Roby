@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>18° Roberta - Condividi i ricordi</title>
+    <!-- Importazione Font in stile con l'invito -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    
+    <!-- Elementi decorativi (foglie) per richiamare il tema -->
+    <div class="leaf leaf-top"></div>
+    <div class="leaf leaf-bottom"></div>
+
+    <div class="container">
+        <header>
+            <h1 class="number">18</h1>
+            <h2 class="name">Roberta</h2>
+            <p class="subtitle">Condividi qui le tue foto e i tuoi video della serata!</p>
+        </header>
+
+        <form id="uploadForm">
+            <!-- Input nascosto, attivato dal pulsante personalizzato -->
+            <input type="file" id="fileInput" multiple accept="image/*,video/mp4,video/quicktime" style="display: none;">
+            
+            <label for="fileInput" class="custom-file-upload">
+                <span id="fileCount">Seleziona Foto / Video</span>
+            </label>
+
+            <button type="submit" id="submitBtn" disabled>Carica nel Drive</button>
+        </form>
+
+        <div id="statusMessage" class="status-message"></div>
+        <div id="loader" class="loader"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
