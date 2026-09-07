@@ -1,14 +1,16 @@
-// === INCOLLA QUI L'URL DELLA TUA APP SCRIPT (Google) ===
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxJDF_2P5erSd0bB2rUETQXMquxzSDd4vKBBT_iVdDrTSvDVjF9KUPZkDMZteXALs4s/exec';
+// === INCOLLA QUI IL NUOVO URL DELLA TUA APP SCRIPT ===
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxA79iBrBKPydigJcsbsRDVfqTyg9DcOdNxQ7KkZv9AOLEGk29vAc7TmUtkcpZaZue6/exec';
 
 const fileInput = document.getElementById('fileInput');
 const fileCount = document.getElementById('fileCount');
 const submitBtn = document.getElementById('submitBtn');
 const uploadForm = document.getElementById('uploadForm');
+const customNameInput = document.getElementById('customName');
 const statusMessage = document.getElementById('statusMessage');
-const loader = document.getElementById('loader');
+const progressContainer = document.getElementById('progressContainer');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
 
-// Aggiorna il testo quando l'utente seleziona i file
 fileInput.addEventListener('change', () => {
     const files = fileInput.files;
     if (files.length === 0) {
@@ -23,13 +25,11 @@ fileInput.addEventListener('change', () => {
     }
 });
 
-// Funzione per convertire il file in Base64
 const getBase64 = (file) => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = () => {
-            // Rimuove il prefisso "data:image/jpeg;base64," per mandarlo pulito ad Apps Script
             let encoded = reader.result.toString().replace(/^data:(.*,)?/, '');
             if ((encoded.length % 4) > 0) {
                 encoded += '='.repeat(4 - (encoded.length % 4));
@@ -40,20 +40,18 @@ const getBase64 = (file) => {
     });
 }
 
-// Gestione dell'invio del Form
 uploadForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const files = fileInput.files;
+    const customName = customNameInput.value.trim();
     if (files.length === 0) return;
 
     submitBtn.disabled = true;
-    loader.style.display = "block";
-    statusMessage.textContent = `Caricamento in corso di 0 su ${files.length} file... Non chiudere la pagina.`;
-    statusMessage.className = "status-message";
+    customNameInput.disabled = true;
+    progressContainer.style.display = "block";
+    progressText.style.display = "block";
+    statusMessage.textContent = "";
 
-    let successCount = 0;
-
-    // Carica un file alla volta per non sovraccaricare Google Apps Script
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         try {
@@ -62,40 +60,69 @@ uploadForm.addEventListener('submit', async (e) => {
             const payload = {
                 filename: file.name,
                 mimeType: file.type,
-                base64: base64Data
+                base64: base64Data,
+                customName: customName
             };
 
-            // Invia al Google Script
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: {
-                    "Content-Type": "text/plain;charset=utf-8",
-                },
+            // Utilizziamo XHR per tracciare la percentuale reale
+            await new Promise((resolve, reject) => {
+                const xhr = new XMLHttpRequest();
+                xhr.open("POST", GOOGLE_SCRIPT_URL, true);
+                xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
+
+                xhr.upload.onprogress = (event) => {
+                    if (event.lengthComputable) {
+                        // Calcola la percentuale per il file corrente più quelli già caricati
+                        let filePercent = event.loaded / event.total;
+                        let totalPercent = Math.round(((i + filePercent) / files.length) * 100);
+                        
+                        progressBar.style.width = totalPercent + "%";
+                        progressText.textContent = totalPercent + "%";
+                        
+                        if (totalPercent === 100) {
+                            progressText.textContent = "Salvataggio nel Drive... attendi un istante!";
+                        }
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status === 200 || xhr.status === 302) {
+                        resolve();
+                    } else {
+                        reject("Errore di rete");
+                    }
+                };
+                
+                xhr.onerror = () => reject("Errore connessione");
+                xhr.send(JSON.stringify(payload));
             });
 
-            successCount++;
-            statusMessage.textContent = `Caricato ${successCount} su ${files.length} file...`;
-
         } catch (error) {
-            console.error("Errore nel caricamento del file:", file.name, error);
+            console.error("Errore:", error);
             statusMessage.textContent = `Errore nel caricamento. Riprova.`;
             statusMessage.className = "status-message error";
-            loader.style.display = "none";
-            submitBtn.disabled = false;
-            return; // Interrompe il ciclo se c'è un errore
+            resetUI();
+            return; 
         }
     }
 
-    // Se tutto va a buon fine
-    loader.style.display = "none";
+    // Successo
     statusMessage.textContent = "Caricamento completato con successo! Grazie!";
     statusMessage.className = "status-message success";
     uploadForm.reset();
-    fileCount.textContent = "Seleziona altre Foto / Video";
+    fileCount.textContent = "Seleziona Foto / Video";
+    resetUI();
     
-    // Ripristina il pulsante dopo 3 secondi
     setTimeout(() => {
         statusMessage.textContent = "";
+        statusMessage.className = "status-message";
     }, 5000);
 });
+
+function resetUI() {
+    submitBtn.disabled = false;
+    customNameInput.disabled = false;
+    progressContainer.style.display = "none";
+    progressText.style.display = "none";
+    progressBar.style.width = "0%";
+}
