@@ -1,4 +1,3 @@
-/* Palette Colori ispirata alla partecipazione */
 :root {
     --bg-cream: #f2eadf;
     --dark-green: #2a3c31;
@@ -16,7 +15,6 @@
 
 body {
     font-family: 'Montserrat', sans-serif;
-    /* Gradiente radiale ispirato allo sfondo dell'immagine */
     background: radial-gradient(circle at center, var(--bg-cream) 0%, #d8dcd3 40%, var(--dark-green) 100%);
     color: var(--text-dark);
     min-height: 100vh;
@@ -24,11 +22,8 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    position: relative;
-    overflow-x: hidden;
 }
 
-/* Pannello centrale in stile Glassmorphism */
 .container {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -40,26 +35,27 @@ body {
     max-width: 450px;
     text-align: center;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-    z-index: 10;
 }
 
+/* Correzione Sovrapposizione Intestazione */
 header {
-    margin-bottom: 30px;
+    margin-bottom: 25px;
 }
 
 .number {
     font-family: 'Playfair Display', serif;
-    font-size: 6rem;
+    font-size: 5.5rem; /* Leggermente ridotto per proporzione */
     line-height: 1;
     color: var(--dark-green);
-    margin-bottom: -15px;
+    margin-bottom: 0px; 
 }
 
 .name {
     font-family: 'Great Vibes', cursive;
     font-size: 4rem;
     color: var(--dark-green);
-    margin-bottom: 10px;
+    margin-top: -10px; /* Li avvicina senza scontrarsi */
+    margin-bottom: 15px;
 }
 
 .subtitle {
@@ -68,11 +64,32 @@ header {
     font-weight: 300;
 }
 
-/* Stile Form e Pulsanti */
 form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+}
+
+/* Stile per il nuovo campo Nome */
+.custom-input {
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.4);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    color: var(--dark-green);
+    text-align: center;
+    outline: none;
+    transition: border 0.3s;
+}
+
+.custom-input:focus {
+    border-color: var(--sage-green);
+}
+
+.custom-input::placeholder {
+    color: #5a6b5e;
 }
 
 .custom-file-upload {
@@ -111,32 +128,37 @@ button:disabled {
     opacity: 0.7;
 }
 
-button:hover:not(:disabled) {
-    background-color: #1a261e;
-}
-
-/* Messaggi e Loader */
-.status-message {
+/* Nuova Barra di Caricamento */
+.progress-container {
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
     margin-top: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
+    height: 15px;
+    overflow: hidden;
+    display: none;
+    border: 1px solid var(--glass-border);
 }
 
-.success { color: #2a3c31; }
-.error { color: #8b0000; }
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--dark-green);
+    transition: width 0.3s ease;
+}
 
-.loader {
-    border: 4px solid rgba(255,255,255,0.3);
-    border-top: 4px solid var(--dark-green);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    animation: spin 1s linear infinite;
-    margin: 20px auto 0;
+.progress-text {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--dark-green);
+    margin-top: 8px;
     display: none;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.status-message {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
 }
+.success { color: #2a3c31; }
+.error { color: #8b0000; }
