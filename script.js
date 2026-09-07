@@ -1,4 +1,3 @@
-// === INCOLLA QUI IL NUOVO URL DELLA TUA APP SCRIPT ===
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7NFQ3I5p7rZXslX3KedEAd8H_htsT9eP9wTLIO0sNkZg50z2dVI4DZcn4ZqcK_gv0/exec';
 
 const fileInput = document.getElementById('fileInput');
@@ -54,6 +53,15 @@ uploadForm.addEventListener('submit', async (e) => {
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
+        
+        // Protezione extra: avvisa se il file è troppo grande (> 35MB per sicurezza)
+        if (file.size > 35 * 1024 * 1024) {
+            statusMessage.textContent = `Il file ${file.name} è troppo grande (Max 35MB).`;
+            statusMessage.className = "status-message error";
+            resetUI();
+            return;
+        }
+
         try {
             const base64Data = await getBase64(file);
             
@@ -64,7 +72,6 @@ uploadForm.addEventListener('submit', async (e) => {
                 customName: customName
             };
 
-            // Utilizziamo XHR per tracciare la percentuale reale
             await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open("POST", GOOGLE_SCRIPT_URL, true);
@@ -72,7 +79,6 @@ uploadForm.addEventListener('submit', async (e) => {
 
                 xhr.upload.onprogress = (event) => {
                     if (event.lengthComputable) {
-                        // Calcola la percentuale per il file corrente più quelli già caricati
                         let filePercent = event.loaded / event.total;
                         let totalPercent = Math.round(((i + filePercent) / files.length) * 100);
                         
@@ -86,27 +92,27 @@ uploadForm.addEventListener('submit', async (e) => {
                 };
 
                 xhr.onload = () => {
-                    if (xhr.status === 200 || xhr.status === 302) {
+                    // Google Apps Script restituisce 200 dopo il redirect
+                    if (xhr.status >= 200 && xhr.status < 300) {
                         resolve();
                     } else {
-                        reject("Errore di rete");
+                        reject(`Errore HTTP: ${xhr.status}`);
                     }
                 };
                 
-                xhr.onerror = () => reject("Errore connessione");
+                xhr.onerror = () => reject("Bloccato (Testi in locale? Permessi Script su 'Chiunque'?)");
                 xhr.send(JSON.stringify(payload));
             });
 
         } catch (error) {
-            console.error("Errore:", error);
-            statusMessage.textContent = `Errore nel caricamento. Riprova.`;
+            console.error("Dettaglio Errore:", error);
+            statusMessage.textContent = `Errore: ${error}`;
             statusMessage.className = "status-message error";
             resetUI();
             return; 
         }
     }
 
-    // Successo
     statusMessage.textContent = "Caricamento completato con successo! Grazie!";
     statusMessage.className = "status-message success";
     uploadForm.reset();
