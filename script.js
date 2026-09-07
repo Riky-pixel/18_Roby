@@ -1,5 +1,5 @@
 // === INCOLLA QUI IL NUOVO URL DELLA TUA APP SCRIPT ===
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwN4YRBkfmGoZzN2bE_RIJav_m9Nr_31Wdln1CWqcIjLcXYkROb7hqaChXukgdHYHb0/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwykNpTvCQXt2Puo8oB1_cdUu7z3osXz1OPZYuxOMEgXdP93hM2s3nYhdamZe8YPfAz/exec';
 
 const fileInput = document.getElementById('fileInput');
 const fileCount = document.getElementById('fileCount');
