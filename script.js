@@ -1,4 +1,4 @@
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz7NFQ3I5p7rZXslX3KedEAd8H_htsT9eP9wTLIO0sNkZg50z2dVI4DZcn4ZqcK_gv0/exec';
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykbLzzFiLznYL-PXhNyRZ2jkMz0_20bApYquODxvD3CNGrO9gz8jxlGlSWN_jKtZy-/exec';
 
 const fileInput = document.getElementById('fileInput');
 const fileCount = document.getElementById('fileCount');
