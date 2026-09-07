@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>18° Roberta - Condividi i ricordi</title>
-    <!-- Importazione Font in stile con l'invito -->
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     
-    <!-- Elementi decorativi (foglie) per richiamare il tema -->
     <div class="leaf leaf-top"></div>
     <div class="leaf leaf-bottom"></div>
 
@@ -22,7 +20,9 @@
         </header>
 
         <form id="uploadForm">
-            <!-- Input nascosto, attivato dal pulsante personalizzato -->
+            <!-- Nuovo campo Nome -->
+            <input type="text" id="customName" class="custom-input" placeholder="Il tuo Nome (es. Lucia)" required>
+
             <input type="file" id="fileInput" multiple accept="image/*,video/mp4,video/quicktime" style="display: none;">
             
             <label for="fileInput" class="custom-file-upload">
@@ -32,8 +32,13 @@
             <button type="submit" id="submitBtn" disabled>Carica nel Drive</button>
         </form>
 
+        <!-- Nuova Barra di Caricamento -->
+        <div id="progressContainer" class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+        <div id="progressText" class="progress-text"></div>
+
         <div id="statusMessage" class="status-message"></div>
-        <div id="loader" class="loader"></div>
     </div>
 
     <script src="script.js"></script>
