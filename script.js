@@ -1,5 +1,5 @@
+// === INCOLLA QUI L'URL DELLA TUA APP SCRIPT ===
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbykbLzzFiLznYL-PXhNyRZ2jkMz0_20bApYquODxvD3CNGrO9gz8jxlGlSWN_jKtZy-/exec';
-
 const fileInput = document.getElementById('fileInput');
 const fileCount = document.getElementById('fileCount');
 const submitBtn = document.getElementById('submitBtn');
@@ -54,13 +54,19 @@ uploadForm.addEventListener('submit', async (e) => {
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         
-        // Protezione extra: avvisa se il file è troppo grande (> 35MB per sicurezza)
-        if (file.size > 35 * 1024 * 1024) {
-            statusMessage.textContent = `Il file ${file.name} è troppo grande (Max 35MB).`;
-            statusMessage.className = "status-message error";
-            resetUI();
-            return;
-        }
+        // Inizializza la barra per il file corrente
+        progressBar.style.width = "0%";
+        progressText.textContent = `Caricamento file ${i + 1} di ${files.length}...`;
+
+        // Simulazione avanzamento visivo per bypassare il blocco di Google
+        let progress = 0;
+        const fakeProgress = setInterval(() => {
+            if (progress < 90) {
+                progress += Math.random() * 10;
+                if (progress > 90) progress = 90;
+                progressBar.style.width = progress + "%";
+            }
+        }, 400);
 
         try {
             const base64Data = await getBase64(file);
@@ -72,47 +78,36 @@ uploadForm.addEventListener('submit', async (e) => {
                 customName: customName
             };
 
-            await new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open("POST", GOOGLE_SCRIPT_URL, true);
-                xhr.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
-
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable) {
-                        let filePercent = event.loaded / event.total;
-                        let totalPercent = Math.round(((i + filePercent) / files.length) * 100);
-                        
-                        progressBar.style.width = totalPercent + "%";
-                        progressText.textContent = totalPercent + "%";
-                        
-                        if (totalPercent === 100) {
-                            progressText.textContent = "Salvataggio nel Drive... attendi un istante!";
-                        }
-                    }
-                };
-
-                xhr.onload = () => {
-                    // Google Apps Script restituisce 200 dopo il redirect
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        resolve();
-                    } else {
-                        reject(`Errore HTTP: ${xhr.status}`);
-                    }
-                };
-                
-                xhr.onerror = () => reject("Bloccato (Testi in locale? Permessi Script su 'Chiunque'?)");
-                xhr.send(JSON.stringify(payload));
+            // Utilizziamo fetch, che è compatibile con i server di Google
+            const response = await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: {
+                    "Content-Type": "text/plain;charset=utf-8",
+                },
             });
 
+            clearInterval(fakeProgress);
+
+            if (!response.ok) throw new Error("Errore di rete");
+
+            // Porta la barra al 100% per questo file
+            progressBar.style.width = "100%";
+            progressText.textContent = "Salvato!";
+            
+            await new Promise(r => setTimeout(r, 600));
+
         } catch (error) {
-            console.error("Dettaglio Errore:", error);
-            statusMessage.textContent = `Errore: ${error}`;
+            clearInterval(fakeProgress);
+            console.error("Errore:", error);
+            statusMessage.textContent = `Errore di connessione. Riprova.`;
             statusMessage.className = "status-message error";
             resetUI();
             return; 
         }
     }
 
+    // Successo
     statusMessage.textContent = "Caricamento completato con successo! Grazie!";
     statusMessage.className = "status-message success";
     uploadForm.reset();
@@ -128,7 +123,9 @@ uploadForm.addEventListener('submit', async (e) => {
 function resetUI() {
     submitBtn.disabled = false;
     customNameInput.disabled = false;
-    progressContainer.style.display = "none";
-    progressText.style.display = "none";
-    progressBar.style.width = "0%";
+    setTimeout(() => {
+        progressContainer.style.display = "none";
+        progressText.style.display = "none";
+        progressBar.style.width = "0%";
+    }, 2000);
 }
